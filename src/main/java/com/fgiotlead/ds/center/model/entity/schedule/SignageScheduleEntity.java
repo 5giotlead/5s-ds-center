@@ -7,6 +7,7 @@ import com.fgiotlead.ds.center.model.entity.SignageStyleEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -24,6 +25,7 @@ import java.util.UUID;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Getter
 @Setter
+@EqualsAndHashCode
 public abstract class SignageScheduleEntity implements Serializable {
 
     @Serial
@@ -46,9 +48,9 @@ public abstract class SignageScheduleEntity implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime modifiedTime;
 
-    @LastModifiedBy
-    @Column(name = "modified_by")
-    private String modifiedBy;
+//    @LastModifiedBy
+//    @Column(name = "modified_by")
+//    private String modifiedBy;
 
     @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(foreignKey = @ForeignKey(name = "STYLE_ID_FK"))

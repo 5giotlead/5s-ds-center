@@ -58,11 +58,21 @@ public class FileUtils {
         Files.delete(path);
     }
 
+
+    public static void restore(SignageFileEntity file) throws IOException {
+        String filename = file.getAccess() + "/" + file.getId() + "." + file.getMimeType();
+        Path backupPath = Paths.get(BACKUP_PATH + filename);
+        Path resourcePath = Paths.get(ROOT_PATH + filename);
+        Files.createDirectories(resourcePath.getParent());
+        Files.copy(backupPath, resourcePath);
+    }
+
     private static void backup(Path path, String filename) throws IOException {
         Path backupPath = Paths.get(BACKUP_PATH + filename);
         Files.createDirectories(backupPath.getParent());
         Files.copy(path, backupPath);
     }
+
 
     public static Flux<ByteBuffer> getFileStream(SignageFileEntity signageFile) {
         String filePath = signageFile.getAccess();

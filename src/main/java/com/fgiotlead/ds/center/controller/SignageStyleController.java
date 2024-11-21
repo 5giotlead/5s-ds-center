@@ -65,15 +65,6 @@ public class SignageStyleController {
     @DeleteMapping("/{styleId}")
     @Operation(summary = "刪除指定播放樣式", description = "使用 ID 刪除播放樣式")
     public ResponseEntity<Map<String, String>> deleteById(@PathVariable(name = "styleId") UUID id) {
-        Map<String, String> responseEntity = new HashMap<>();
-        Optional<SignageStyleEntity> style = signageStyleService.findById(id);
-        if (style.isPresent()) {
-            signageStyleService.delete(style.get());
-            responseEntity.put("message", "刪除成功");
-            return new ResponseEntity<>(responseEntity, HttpStatus.OK);
-        } else {
-            responseEntity.put("message", "刪除失敗");
-            return new ResponseEntity<>(responseEntity, HttpStatus.BAD_REQUEST);
-        }
+        return signageStyleService.delete(id);
     }
 }

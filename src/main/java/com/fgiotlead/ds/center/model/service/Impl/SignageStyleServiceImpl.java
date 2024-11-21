@@ -6,10 +6,13 @@ import com.fgiotlead.ds.center.model.entity.SignageBlockEntity;
 import com.fgiotlead.ds.center.model.entity.SignageEdgeEntity;
 import com.fgiotlead.ds.center.model.entity.SignageStyleEntity;
 import com.fgiotlead.ds.center.model.entity.SignageTemplateEntity;
+import com.fgiotlead.ds.center.model.entity.schedule.RegularScheduleEntity;
 import com.fgiotlead.ds.center.model.repository.SignageStyleRepository;
 import com.fgiotlead.ds.center.model.service.SignageBlockService;
+import com.fgiotlead.ds.center.model.service.SignageEdgeService;
 import com.fgiotlead.ds.center.model.service.SignageStyleService;
 import com.fgiotlead.ds.center.model.service.SignageTemplateService;
+import com.fgiotlead.ds.center.model.service.schedule.SignageScheduleService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +27,8 @@ import java.util.*;
 public class SignageStyleServiceImpl implements SignageStyleService {
 
     private SignageStyleRepository signageStyleRepository;
+    private SignageEdgeService signageEdgeService;
+    private SignageScheduleService<RegularScheduleEntity> regularScheduleService;
     private SignageBlockService signageBlockService;
     private SignageTemplateService signageTemplateService;
     private SignageEventPublisher signageEventPublisher;
@@ -67,28 +72,38 @@ public class SignageStyleServiceImpl implements SignageStyleService {
     public ResponseEntity<Map<String, String>> update(SignageStyleEntity signageStyle) {
         Map<String, String> responseEntity = new HashMap<>();
         if (signageStyleRepository.findById(signageStyle.getId()).isPresent()) {
-            signageStyleRepository.save(signageStyle);
-            Optional<SignageStyleEntity> styleOptional = signageStyleRepository.findById(signageStyle.getId());
-            assert styleOptional.isPresent();
-            this.updateSettingsStatus(styleOptional.get());
+            SignageStyleEntity style = signageStyleRepository.save(signageStyle);
+            this.updateSettingsStatus(regularScheduleService.findAllByStyle(style));
             responseEntity.put("message", "修改成功");
             return new ResponseEntity<>(responseEntity, HttpStatus.OK);
         } else {
-            responseEntity.put("message", "修改失敗");
-            responseEntity.put("state", "Style 不存在");
+            responseEntity.put("message", "修改失敗，樣式不存在");
             return new ResponseEntity<>(responseEntity, HttpStatus.NOT_FOUND);
         }
     }
 
     @Override
-    public void delete(SignageStyleEntity signageStyle) {
-        signageStyleRepository.delete(signageStyle);
-        updateSettingsStatus(signageStyle);
+    public ResponseEntity<Map<String, String>> delete(UUID id) {
+        Map<String, String> responseEntity = new HashMap<>();
+        Optional<SignageStyleEntity> styleOptional = signageStyleRepository.findById(id);
+        if (styleOptional.isPresent()) {
+            SignageStyleEntity style = styleOptional.get();
+            signageStyleRepository.delete(style);
+            this.updateSettingsStatus(style.getSchedules());
+            responseEntity.put("message", "刪除成功");
+            return new ResponseEntity<>(responseEntity, HttpStatus.OK);
+        } else {
+            responseEntity.put("message", "刪除失敗，樣式不存在");
+            return new ResponseEntity<>(responseEntity, HttpStatus.NOT_FOUND);
+        }
     }
 
-    private void updateSettingsStatus(SignageStyleEntity signageStyle) {
+    private void updateSettingsStatus(List<RegularScheduleEntity> schedules) {
         Set<SignageEdgeEntity> edges = new HashSet<>();
-        signageStyle.getSchedules().forEach(schedule -> edges.add(schedule.getProfile().getEdge()));
-        edges.forEach(edge -> signageEventPublisher.publish(this, edge));
+        schedules.forEach(schedule -> edges.add(schedule.getProfile().getEdge()));
+        edges.forEach(edge -> {
+            edge.getProfiles().forEach(profile -> profile.getSchedules().removeAll(schedules));
+            signageEventPublisher.publish(this, edge);
+        });
     }
 }

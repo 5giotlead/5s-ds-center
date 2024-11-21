@@ -4,6 +4,7 @@ package com.fgiotlead.ds.center.model.service.schedule.Impl;
 import com.fgiotlead.ds.center.event.SignageEventPublisher;
 import com.fgiotlead.ds.center.model.entity.SignageEdgeEntity;
 import com.fgiotlead.ds.center.model.entity.SignageProfileEntity;
+import com.fgiotlead.ds.center.model.entity.SignageStyleEntity;
 import com.fgiotlead.ds.center.model.entity.schedule.RegularScheduleEntity;
 import com.fgiotlead.ds.center.model.repository.schedule.RegularScheduleRepository;
 import com.fgiotlead.ds.center.model.service.SignageProfileService;
@@ -33,6 +34,11 @@ public class RegularScheduleServiceImpl implements SignageScheduleService<Regula
     @Override
     public Optional<RegularScheduleEntity> findById(UUID id) {
         return regularScheduleRepository.findById(id);
+    }
+
+    @Override
+    public List<RegularScheduleEntity> findAllByStyle(SignageStyleEntity style) {
+        return regularScheduleRepository.findAllByStyle(style);
     }
 
     @Override
@@ -78,8 +84,8 @@ public class RegularScheduleServiceImpl implements SignageScheduleService<Regula
 
     @Override
     public void delete(RegularScheduleEntity regularSchedule) {
-        updateSettingsStatus(regularSchedule);
         regularScheduleRepository.delete(regularSchedule);
+        updateSettingsStatus(regularSchedule);
     }
 
     private List<RegularScheduleEntity> isOverlap(RegularScheduleEntity regularSchedule) {

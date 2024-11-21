@@ -60,9 +60,8 @@ public class SignageStyleEntity implements Serializable {
     @JsonManagedReference
     private List<SignageBlockEntity> blocks = new ArrayList<>();
 
-    @OneToMany(mappedBy = "style", cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "style", cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.EAGER)
     @Fetch(FetchMode.SUBSELECT)
-//    @Schema(hidden = true)
     @Builder.Default
     @JsonIgnore
     private List<RegularScheduleEntity> schedules = new ArrayList<>();

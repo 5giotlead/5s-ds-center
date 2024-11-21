@@ -10,7 +10,6 @@ import com.fgiotlead.ds.center.model.repository.SignageEdgeRepository;
 import com.fgiotlead.ds.center.model.service.SignageEdgeService;
 import com.fgiotlead.ds.center.rsocket.model.entity.EdgeState;
 import com.fgiotlead.ds.center.rsocket.model.service.RSocketService;
-import com.fgiotlead.ds.center.tb.model.service.TbEdgeService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +24,6 @@ import java.util.*;
 public class SignageEdgeServiceImpl implements SignageEdgeService {
 
     private SignageEdgeRepository signageEdgeRepository;
-    private TbEdgeService tbEdgeService;
     private RSocketService rSocketService;
 
     @Override
@@ -111,7 +109,7 @@ public class SignageEdgeServiceImpl implements SignageEdgeService {
     @EventListener
     public void publishSettings(PublishEvent publishEvent) {
         SignageEdgeEntity signageEdge = publishEvent.getSignageEdge();
-        this.updateStatus(DownlinkStatus.PENDING, signageEdge.getId());
+        this.updateStatus(DownlinkStatus.WAITING, signageEdge.getId());
         this.publish(signageEdge);
     }
 

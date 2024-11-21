@@ -16,7 +16,9 @@ public class WebSecurityConfiguration {
                         authorize -> authorize
                                 .requestMatchers("/api/signage/**").permitAll()
                                 .anyRequest().permitAll()
-                );
+//                );
+                )
+                .csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
 }

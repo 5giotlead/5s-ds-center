@@ -1,5 +1,7 @@
 package com.fgiotlead.ds.center.model.service.schedule;
 
+import com.fgiotlead.ds.center.model.entity.SignageStyleEntity;
+import com.fgiotlead.ds.center.model.entity.schedule.RegularScheduleEntity;
 import com.fgiotlead.ds.center.model.entity.schedule.SignageScheduleEntity;
 import org.springframework.http.ResponseEntity;
 
@@ -13,6 +15,8 @@ public interface SignageScheduleService<T extends SignageScheduleEntity> {
     List<T> findAll();
 
     Optional<T> findById(UUID id);
+
+    List<T> findAllByStyle(SignageStyleEntity style);
 
     ResponseEntity<Map<String, String>> save(T t);
 

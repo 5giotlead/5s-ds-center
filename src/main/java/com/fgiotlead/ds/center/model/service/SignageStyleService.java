@@ -19,5 +19,5 @@ public interface SignageStyleService {
 
     ResponseEntity<Map<String, String>> update(SignageStyleEntity style);
 
-    void delete(SignageStyleEntity style);
+    ResponseEntity<Map<String, String>> delete(UUID id);
 }

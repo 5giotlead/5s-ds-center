@@ -38,7 +38,8 @@ public class SignageProfileEntity implements Serializable {
     @JsonBackReference
     private SignageEdgeEntity edge;
 
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "profile", cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @OrderBy("weekDay")
     @Builder.Default
     @ToString.Exclude
     @JsonManagedReference

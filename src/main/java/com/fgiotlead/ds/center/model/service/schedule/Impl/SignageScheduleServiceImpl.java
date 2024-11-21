@@ -1,5 +1,6 @@
 package com.fgiotlead.ds.center.model.service.schedule.Impl;
 
+import com.fgiotlead.ds.center.model.entity.SignageStyleEntity;
 import com.fgiotlead.ds.center.model.entity.schedule.SignageScheduleEntity;
 import com.fgiotlead.ds.center.model.repository.schedule.SignageScheduleRepository;
 import com.fgiotlead.ds.center.model.service.schedule.SignageScheduleService;
@@ -27,6 +28,11 @@ public class SignageScheduleServiceImpl implements SignageScheduleService<Signag
     public Optional<SignageScheduleEntity> findById(UUID id) {
         return signageScheduleRepository.findById(id);
 
+    }
+
+    @Override
+    public List<SignageScheduleEntity> findAllByStyle(SignageStyleEntity style) {
+        return List.of();
     }
 
     @Override
