@@ -2,11 +2,9 @@ package com.fgiotlead.ds.center.model.service.Impl;
 
 
 import com.fgiotlead.ds.center.event.SignageEventPublisher;
-import com.fgiotlead.ds.center.model.entity.SignageBlockEntity;
-import com.fgiotlead.ds.center.model.entity.SignageEdgeEntity;
-import com.fgiotlead.ds.center.model.entity.SignageStyleEntity;
-import com.fgiotlead.ds.center.model.entity.SignageTemplateEntity;
+import com.fgiotlead.ds.center.model.entity.*;
 import com.fgiotlead.ds.center.model.entity.schedule.RegularScheduleEntity;
+import com.fgiotlead.ds.center.model.enumEntity.OperationType;
 import com.fgiotlead.ds.center.model.repository.SignageStyleRepository;
 import com.fgiotlead.ds.center.model.service.SignageBlockService;
 import com.fgiotlead.ds.center.model.service.SignageEdgeService;
@@ -27,7 +25,6 @@ import java.util.*;
 public class SignageStyleServiceImpl implements SignageStyleService {
 
     private SignageStyleRepository signageStyleRepository;
-    private SignageEdgeService signageEdgeService;
     private SignageScheduleService<RegularScheduleEntity> regularScheduleService;
     private SignageBlockService signageBlockService;
     private SignageTemplateService signageTemplateService;
@@ -71,9 +68,11 @@ public class SignageStyleServiceImpl implements SignageStyleService {
     @Override
     public ResponseEntity<Map<String, String>> update(SignageStyleEntity signageStyle) {
         Map<String, String> responseEntity = new HashMap<>();
-        if (signageStyleRepository.findById(signageStyle.getId()).isPresent()) {
-            SignageStyleEntity style = signageStyleRepository.save(signageStyle);
-            this.updateSettingsStatus(regularScheduleService.findAllByStyle(style));
+        Optional<SignageStyleEntity> styleOptional = signageStyleRepository.findById(signageStyle.getId());
+        if (styleOptional.isPresent()) {
+            signageStyle.setSchedules(styleOptional.get().getSchedules());
+            signageStyleRepository.save(signageStyle);
+            this.updateSettingsStatus(regularScheduleService.findAllByStyle(signageStyle), OperationType.UPDATE);
             responseEntity.put("message", "修改成功");
             return new ResponseEntity<>(responseEntity, HttpStatus.OK);
         } else {
@@ -88,8 +87,12 @@ public class SignageStyleServiceImpl implements SignageStyleService {
         Optional<SignageStyleEntity> styleOptional = signageStyleRepository.findById(id);
         if (styleOptional.isPresent()) {
             SignageStyleEntity style = styleOptional.get();
+            List<RegularScheduleEntity> schedules = regularScheduleService.findAllByStyle(style);
+            Set<SignageProfileEntity> profiles = new HashSet<>();
+            schedules.forEach(schedule -> profiles.add(schedule.getProfile()));
+            profiles.forEach(profile -> profile.getSchedules().removeAll(schedules));
             signageStyleRepository.delete(style);
-            this.updateSettingsStatus(style.getSchedules());
+            this.updateSettingsStatus(style.getSchedules(), OperationType.DELETE);
             responseEntity.put("message", "刪除成功");
             return new ResponseEntity<>(responseEntity, HttpStatus.OK);
         } else {
@@ -98,11 +101,13 @@ public class SignageStyleServiceImpl implements SignageStyleService {
         }
     }
 
-    private void updateSettingsStatus(List<RegularScheduleEntity> schedules) {
+    private void updateSettingsStatus(List<RegularScheduleEntity> schedules, OperationType operationType) {
         Set<SignageEdgeEntity> edges = new HashSet<>();
         schedules.forEach(schedule -> edges.add(schedule.getProfile().getEdge()));
         edges.forEach(edge -> {
-            edge.getProfiles().forEach(profile -> profile.getSchedules().removeAll(schedules));
+            if (operationType.equals(OperationType.DELETE)) {
+                edge.getProfiles().forEach(profile -> profile.getSchedules().removeAll(schedules));
+            }
             signageEventPublisher.publish(this, edge);
         });
     }

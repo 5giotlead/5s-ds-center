@@ -29,4 +29,12 @@ public class ApiAdvice {
         log.error(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(Exception.class)
+    public final ResponseEntity<Map<String, String>> handleException(Exception e) {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "非預期錯誤");
+        log.error(e.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
 }
