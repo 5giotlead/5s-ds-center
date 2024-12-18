@@ -1,0 +1,25 @@
+services:
+  ds-center:
+    restart: always
+    image: "5giotlead/ds-center:1.0.0"
+    depends_on:
+      - postgres
+      - spx
+    ports:
+      - "8081:8081"
+      - "9898:9898"
+    environment:
+      APPLICATION_WEB_PORT: 8081
+      DATASOURCE_URL: jdbc:postgresql://postgres:5432/ds-center
+      SPRING_DATASOURCE_USERNAME:
+      TB_SECURE: false
+      TB_HOST: localhost
+      TB_WEB_PORT: 8080
+      TB_MQTT_PORT: 1883
+      SWAGGER_UI_ENABLE: true
+      API_DOCS_ENABLE: true
+      TB_MQTT_TELEMETRY_TOPIC: v1/devices/me/telemetry
+      TB_MQTT_ATTRIBUTES_TOPIC: v1/devices/me/attributes
+    volumes:
+      - /path/to/resource_folder:/resource
+      - /path/to/backup_folder:/backup
