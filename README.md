@@ -19,6 +19,20 @@
 *   透過修改 edge 內的各設備 profile 設定排程及要播放的樣式 ( style )。
 *   edge 透過 RSocket 連線後，center 會將 session object 保存在 memory，等待有任何更新時同步至 edge。
 *   檔案刪除後會備份到 backup 資料夾下，暫無定期自動刪除功能。
+*   靜態資源上傳後透過 web server host ( NginX etc... )，預設圖片需手動複製到靜態資源存放路徑。
+    *   NginX sample config:
+        ```
+        server {
+            listen       8082;
+            server_name  localhost;
+
+            #access_log  /var/log/nginx/host.access.log  main;
+
+            location /resource {
+                alias /usr/share/nginx/.spx-resource;
+            }
+        }
+        ```
 
 ## Setup
 
