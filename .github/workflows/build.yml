@@ -1,0 +1,37 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    env:
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: mvn clean package
+
+      - name: Build Docker image
+        run: docker build --progress=plain -t ghcr.io/5giotlead/ds-center .
+
+      - name: Log in to Docker registry
+        run: echo "$REGISTRY_PASSWORD" | docker login ghcr.io/5giotlead -u "$REGISTRY_USERNAME" --password-stdin
+
+      - name: Push Docker image
+        run: docker push ghcr.io/5giotlead/ds-center
